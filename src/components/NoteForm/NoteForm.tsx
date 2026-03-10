@@ -11,7 +11,7 @@ interface NoteFormProps {
 interface FormValues {
   title: string;
   content: string;
-  tag: string;
+  tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
 }
 
 const initialValues: FormValues = {
@@ -21,9 +21,16 @@ const initialValues: FormValues = {
 };
 
 const validationSchema = Yup.object({
-  title: Yup.string().required("Title is required"),
-  content: Yup.string().required("Content is required"),
-  tag: Yup.string().required("Tag is required"),
+  title: Yup.string()
+    .min(3, "Minimum 3 characters")
+    .max(50, "Maximum 50 characters")
+    .required("Title is required"),
+
+  content: Yup.string().max(500, "Maximum 500 characters"),
+
+  tag: Yup.string()
+    .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
+    .required("Tag is required"),
 });
 
 export default function NoteForm({ onClose }: NoteFormProps) {

@@ -16,7 +16,7 @@ export default function App() {
   const [perPage] = useState(12);
   const [isClicked, setIsClicked] = useState(false);
   const { data, isError, isLoading } = useQuery({
-    queryKey: ["note", query, currentPage],
+    queryKey: ["notes", query, currentPage],
     queryFn: () => fetchNotes(query, currentPage, perPage),
     placeholderData: keepPreviousData,
   });
@@ -31,7 +31,7 @@ export default function App() {
 
   const totalPages = data?.totalPages ?? 0;
 
-  function handleChachePage(newPage: number) {
+  function handleChangePage(newPage: number) {
     setCurrentPage(newPage);
   }
 
@@ -47,7 +47,7 @@ export default function App() {
           <Pagination
             pageCount={data?.totalPages ?? 0}
             currentPage={currentPage}
-            onPageChange={handleChachePage}
+            onPageChange={handleChangePage}
           />
         )}
         <button className={css.button} onClick={() => setIsClicked(true)}>
@@ -56,7 +56,9 @@ export default function App() {
       </header>
 
       {isLoading && <Loader />}
-      {data && !isError && <NoteList notes={data?.notes ?? []} />}
+      {data && data.notes.length > 0 && !isError && (
+        <NoteList notes={data?.notes ?? []} />
+      )}
       {isClicked && (
         <Modal onClose={handelCloseModal}>
           <NoteForm onClose={handelCloseModal} />

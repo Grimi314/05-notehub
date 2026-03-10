@@ -28,8 +28,8 @@ export async function fetchNotes(searchText: string, page: number , perPage: num
 
 interface CreateNoteProps {
   title: string ,
-  content: string ,
-  tag: string
+  content: string | null ,
+  tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping'
 }
 
 export async  function createNote(newPost: CreateNoteProps): Promise<Note> {

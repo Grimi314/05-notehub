@@ -1,12 +1,12 @@
 import css from "./Modal.module.css";
 import { createPortal } from "react-dom";
 import React, { useEffect } from "react";
-interface MidalProps {
+interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
 }
 
-export default function Modal({ onClose, children }: MidalProps) {
+export default function Modal({ onClose, children }: ModalProps) {
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
