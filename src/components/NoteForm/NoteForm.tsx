@@ -1,92 +1,84 @@
 import css from "./NoteForm.module.css";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "../../services/noteService";
 
-interface NoteFormaProps {
+interface NoteFormProps {
   onClose: () => void;
 }
 
-interface OrderValue {
+interface FormValues {
   title: string;
-  tag: string;
   content: string;
+  tag: string;
 }
 
-const initialValue: OrderValue = {
+const initialValues: FormValues = {
   title: "",
   content: "",
-  tag: "Tags",
+  tag: "Todo",
 };
 
 const validationSchema = Yup.object({
-  title: Yup.string()
-    .min(3, "Minomum 3 characters")
-    .max(50, "Maximum 50 characters")
-    .required("Title is required"),
-  content: Yup.string().max(500, "Maximum 500 characters"),
-  tag: Yup.string()
-    .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
-    .required("tag is Required"),
+  title: Yup.string().required("Title is required"),
+  content: Yup.string().required("Content is required"),
+  tag: Yup.string().required("Tag is required"),
 });
 
-async function handleCreateNote(values: OrderValue) {
-  try {
-    await createNote(values);
-  } catch (error) {
-    console.error("Помилка створення нотатки:", error);
-  }
-}
+export default function NoteForm({ onClose }: NoteFormProps) {
+  const queryClient = useQueryClient();
 
-export default function NoteForm({ onClose }: NoteFormaProps) {
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      onClose();
+    },
+  });
+
+  const handleSubmit = (values: FormValues) => {
+    mutation.mutate(values);
+  };
+
   return (
     <Formik
-      initialValues={initialValue}
+      initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={async (values, { setSubmitting, resetForm }) => {
-        await handleCreateNote(values);
-        resetForm();
-        setSubmitting(false);
-        onClose();
-      }}
+      onSubmit={handleSubmit}
     >
       <Form className={css.form}>
-        <div className={css.formGroup}>
-          <label htmlFor="title">Title</label>
-          <Field id="title" type="text" name="title" className={css.input} />
-          <ErrorMessage name="title" className={css.error} />
-        </div>
+        <label>
+          Title
+          <Field name="title" type="text" />
+          <ErrorMessage name="title" component="span" />
+        </label>
 
-        <div className={css.formGroup}>
-          <label htmlFor="content">Content</label>
-          <Field
-            as="textarea"
-            id="content"
-            name="content"
-            rows={8}
-            className={css.textarea}
-          />
-          <ErrorMessage name="content" className={css.error} />
-        </div>
+        <label>
+          Content
+          <Field name="content" as="textarea" />
+          <ErrorMessage name="content" component="span" />
+        </label>
 
-        <div className={css.formGroup}>
-          <label htmlFor="tag">Tag</label>
-          <Field as="select" id="tag" name="tag" className={css.select}>
+        <label>
+          Tag
+          <Field name="tag" as="select">
             <option value="Todo">Todo</option>
             <option value="Work">Work</option>
             <option value="Personal">Personal</option>
             <option value="Meeting">Meeting</option>
             <option value="Shopping">Shopping</option>
           </Field>
-          <ErrorMessage name="tag" className={css.error} />
-        </div>
+          <ErrorMessage name="tag" component="span" />
+        </label>
 
         <div className={css.actions}>
-          <button type="button" className={css.cancelButton} onClick={onClose}>
-            Cancel
+          <button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? "Creating..." : "Create"}
           </button>
-          <button type="submit" className={css.submitButton} disabled={false}>
-            Create note
+
+          <button type="button" onClick={onClose}>
+            Cancel
           </button>
         </div>
       </Form>

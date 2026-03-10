@@ -3,8 +3,6 @@ import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDebouncedCallback } from "use-debounce";
 import { fetchNotes } from "../../services/noteService";
-import { deleteNote } from "../../services/noteService";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import NoteList from "../NoteList/NoteList";
 import SearchBox from "../SearchBox/SearchBox";
 import Pagination from "../Pagination/Pagination";
@@ -26,6 +24,7 @@ export default function App() {
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setQuery(event.target.value);
       setSearchText(event.target.value);
+      setCurrentPage(1);
     },
     1000,
   );
@@ -40,18 +39,6 @@ export default function App() {
     setIsClicked(false);
   }
 
-  const queryClient = useQueryClient();
-  const mutation = useMutation({
-    mutationFn: deleteNote,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: ["note"],
-      }),
-  });
-
-  function handleDelete(id: number) {
-    mutation.mutate(id);
-  }
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
@@ -69,9 +56,7 @@ export default function App() {
       </header>
 
       {isLoading && <Loader />}
-      {data && !isError && (
-        <NoteList notes={data?.notes ?? []} onDelete={handleDelete} />
-      )}
+      {data && !isError && <NoteList notes={data?.notes ?? []} />}
       {isClicked && (
         <Modal onClose={handelCloseModal}>
           <NoteForm onClose={handelCloseModal} />
