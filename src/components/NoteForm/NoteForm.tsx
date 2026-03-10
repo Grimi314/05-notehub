@@ -1,7 +1,7 @@
 import css from "./NoteForm.module.css";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { createNote } from "../../services/noteServices";
+import { createNote } from "../../services/noteService";
 
 interface NoteFormaProps {
   onClose: () => void;
